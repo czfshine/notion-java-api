@@ -1,19 +1,16 @@
 package test.cn.czfshine.notion.model;
 
-import cn.czfshine.notion.model.Paser;
+import cn.czfshine.notion.parser.Parser;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 
 /**
- * Paser Tester.
+ * Parser Tester.
  *
- * @author <Authors name>
+ * @author czfshine
  * @version 1.0
  * @since <pre>Jun 30, 2019</pre>
  */
@@ -27,22 +24,23 @@ public class PaserTest {
     public void after() throws Exception {
     }
 
-    /**
-     * Method: paserPageChunk(String json)
-     */
-    @Test
-    public void testPaserPageChunk() throws Exception {
-
-
+    private static String getResourcesFileContent(String filename) throws IOException {
         BufferedReader bufferedReader = new BufferedReader(
                 new InputStreamReader(
-                        new FileInputStream(new File("./src/main/resources/page.json"))));
+                        new FileInputStream(new File("./src/main/resources/" + filename))));
         StringBuilder stringBuilder = new StringBuilder();
         while (bufferedReader.ready()) {
             stringBuilder.append(bufferedReader.readLine());
         }
-        Paser.paserPageChunk(stringBuilder.toString());
+        return stringBuilder.toString();
+    }
 
+    /**
+     * Method: parserPageChunk(String json)
+     */
+    @Test
+    public void testPaserPageChunk() throws Exception {
+        Parser.parserPageChunk(getResourcesFileContent("page.json"));
     }
 
     /**
@@ -50,30 +48,19 @@ public class PaserTest {
      */
     @Test
     public void testParserUserContent() throws Exception {
-
-
-        BufferedReader bufferedReader = new BufferedReader(
-                new InputStreamReader(
-                        new FileInputStream(new File("./src/main/resources/userContent.json"))));
-        StringBuilder stringBuilder = new StringBuilder();
-        while (bufferedReader.ready()) {
-            stringBuilder.append(bufferedReader.readLine());
-        }
-        Paser.parserUserContent(stringBuilder.toString());
-
-//TODO: Test goes here... 
+        Parser.parserUserContent(getResourcesFileContent("userContent.json"));
     }
 
 
     /**
-     * Method: parserTitle(ArrayList title)
+     * Method: parserTitle(ArrayList text)
      */
     @Test
     public void testParserTitle() throws Exception {
 //TODO: Test goes here... 
 /* 
 try { 
-   Method method = Paser.getClass().getMethod("parserTitle", ArrayList.class); 
+   Method method = Parser.getClass().getMethod("parserTitle", ArrayList.class);
    method.setAccessible(true); 
    method.invoke(<Object>, <Parameters>); 
 } catch(NoSuchMethodException e) { 
@@ -91,7 +78,7 @@ try {
 //TODO: Test goes here... 
 /* 
 try { 
-   Method method = Paser.getClass().getMethod("parserTextBlock", String.class, Info.class); 
+   Method method = Parser.getClass().getMethod("parserTextBlock", String.class, Info.class);
    method.setAccessible(true); 
    method.invoke(<Object>, <Parameters>); 
 } catch(NoSuchMethodException e) { 

@@ -1,24 +1,21 @@
 package cn.czfshine.notion.model;
 
-public class TextBlock {
+import lombok.Data;
 
-    private String text;
+@Data
+public class TextBlock extends Block {
 
-    public TextBlock(String text) {
-        this.text = text;
-    }
-
+    private RichText text;
     public TextBlock() {
 
     }
-
     /**
      * 获取纯文本
      *
      * @return
      */
     public String getPlainText() {
-        return text;
+        return text.getTitle();
     }
 
 }
