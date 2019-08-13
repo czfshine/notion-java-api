@@ -1,4 +1,4 @@
-package test.cn.czfshine.notion.model;
+package model;
 
 import cn.czfshine.notion.parser.Parser;
 import org.junit.After;
