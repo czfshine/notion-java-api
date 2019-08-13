@@ -4,7 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Set;
 
 /**解析Json到对象.
  * 注意：有些内部类和json的key是一一对应的，
@@ -43,6 +46,7 @@ public class Paser {
             List<HashMap<String,Object>> permissions;
 
 
+            String name;
             //common
             String created_by;
             //todo 时间戳->Date
@@ -55,25 +59,29 @@ public class Paser {
         }
         Value value;
     }
-    private static class PageChunk{
+
+    private static class ResponeJson {
         class RecordMap{
             HashMap<String,Info> block;
             HashMap<String,Info> space;
-
             HashMap<String,Info> notion_user;
+            HashMap<String, Info> user_root;
+            HashMap<String, Info> user_settings;
+            HashMap<String, Info> space_view;
         }
         RecordMap recordMap;
         HashMap<String,LinkedTreeMap> cursor;
     }
 
+    private static Gson gson = new Gson();
     /**
      * 分析页面数据
      **/
     public static  void paserPageChunk(String json ){
-        Gson gson = new Gson();
+
 
         //todo 解析异常
-        PageChunk pageChunk = gson.fromJson(json, PageChunk.class);
+        ResponeJson pageChunk = gson.fromJson(json, ResponeJson.class);
 
         //users's info
         HashMap<String, Info> notion_user = pageChunk.recordMap.notion_user;
@@ -93,16 +101,57 @@ public class Paser {
         Set<String> strings = workspaces.keySet();
         for (String uuid: strings
              ) {
-            log.debug("workspace name:{}",workspaces.get(uuid));
+            log.debug("workspace name:{}", workspaces.get(uuid).value);
         }
         //blocks
 
         HashMap<String, Info> blocks = pageChunk.recordMap.block;
 
-        for (Info block:blocks.values()
+        for (String uuid : blocks.keySet()
              ) {
-            log.debug("block - type:{}",block.value.type);
+            Info block = blocks.get(uuid);
+            BlockType typeByName = BlockType.getTypeByName(block.value.type);
+
+            if (typeByName.equals(BlockType.TEXT)) {
+                parserTextBlock(uuid, block);
+            }
+
+            if (typeByName.equals(BlockType.UNKNOWN)) {
+                log.warn("block - unknown type:{}", block.value.type);
+            }
         }
         //System.out.println(gson.toJson(pageChunk));
+    }
+
+    private static String parserTitle(ArrayList title) {
+
+        String res = "";
+
+
+        for (Object o : title
+        ) {
+            ArrayList arrayList = (ArrayList) o;
+
+            if (arrayList.size() == 1) {
+                res += arrayList.get(0).toString();
+            } else {
+                //todo
+            }
+        }
+
+        return res;
+    }
+
+    private static void parserTextBlock(String uuid, Info block) {
+        //System.out.println(uuid);
+        if (block.value.properties != null) {
+            //System.out.println(parserTitle((ArrayList) block.value.properties.get("title")));
+        }
+    }
+
+
+    public static void parserUserContent(String json) {
+        ResponeJson responeJson = gson.fromJson(json, ResponeJson.class);
+
     }
 }
