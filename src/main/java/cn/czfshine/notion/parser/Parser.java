@@ -51,11 +51,26 @@ public class Parser {
             //到时把这个map丢到工厂函数构建对象即可
             HashMap<String,Object> properties;
             List<String> content;
+            List<String> discussions;
             List<HashMap<String,Object>> permissions;
 
 
             String name;
-            Object format;//todo
+
+            @Data
+            class Format {
+                String display_source;
+                boolean block_full_width;
+                int block_height;
+                boolean block_page_width;
+                boolean block_preserve_scale;
+                int block_width;
+                String block_color;
+                String page_icon;
+            }
+
+            Format format;
+
             //common
             String created_by;
             //todo 时间戳->Date

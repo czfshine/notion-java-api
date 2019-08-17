@@ -842,15 +842,33 @@
         "role": "editor",
         "value": {
           "id": "43baaeae-f5da-4153-afd1-bdb514ce2444",
-          "version": 3,
+          "version": 9,
           "type": "embed",
+          "properties": {
+            "source": [
+              [
+                "https://s3-us-west-2.amazonaws.com/secure.notion-static.com/8fdf8972-acbb-4c18-91ea-cf9d58e809a3/self.md"
+              ]
+            ]
+          },
+          "format": {
+            "block_width": 400,
+            "block_height": 320,
+            "display_source": "https://s3-us-west-2.amazonaws.com/secure.notion-static.com/8fdf8972-acbb-4c18-91ea-cf9d58e809a3/self.md",
+            "block_full_width": false,
+            "block_page_width": false,
+            "block_preserve_scale": false
+          },
           "created_by": "6dde2319-d715-4b5a-9d9d-67257d578744",
           "created_time": 1561876665619,
-          "last_edited_by": "6dde2319-d715-4b5a-9d9d-67257d578744",
-          "last_edited_time": 1561876620000,
+          "last_edited_by": "622ea853-54a5-446d-95e1-29fdb069ebe5",
+          "last_edited_time": 1566027300000,
           "parent_id": "ae9ff493-017b-4cf2-8ca5-9a3a9efa88e8",
           "parent_table": "block",
-          "alive": true
+          "alive": true,
+          "file_ids": [
+            "8fdf8972-acbb-4c18-91ea-cf9d58e809a3"
+          ]
         }
       },
       "a2508d38-c8d1-4897-a6e3-3b2c25b3681d": {

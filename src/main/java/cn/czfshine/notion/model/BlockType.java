@@ -37,7 +37,7 @@ public enum BlockType {
 
 
     //what is this ?
-    Collectionview("collection_view"),
+    COLLECTIONVIEW("collection_view"),
     PAGE("page"),
     BREADCRUMB("breadcrumb"),
     FACTORY("factory"),

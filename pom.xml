@@ -157,5 +157,14 @@
             <version>0.0.20131108.vaadin1</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/org.jetbrains/annotations -->
+        <!--idea的注解 能够在别的地方编译通过的 -->
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>17.0.0</version>
+        </dependency>
+
+
     </dependencies>
 </project>
