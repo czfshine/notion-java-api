@@ -1,4 +1,4 @@
-package cn.czfshine.notion.model;
+package cn.czfshine.notion.model.block;
 
 import cn.czfshine.notion.parser.BlockFactory;
 import cn.czfshine.notion.parser.Parser;

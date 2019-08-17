@@ -1,6 +1,5 @@
-package model;
+package cn.czfshine.notion.parser;
 
-import cn.czfshine.notion.parser.Parser;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

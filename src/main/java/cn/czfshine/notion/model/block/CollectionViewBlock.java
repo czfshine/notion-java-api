@@ -1,5 +1,6 @@
-package cn.czfshine.notion.model;
+package cn.czfshine.notion.model.block;
 
+import cn.czfshine.notion.model.View;
 import lombok.Data;
 
 @Data

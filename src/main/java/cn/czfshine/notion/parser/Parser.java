@@ -1,8 +1,8 @@
 package cn.czfshine.notion.parser;
 
-import cn.czfshine.notion.model.Block;
-import cn.czfshine.notion.model.BlockType;
-import cn.czfshine.notion.model.PageBlock;
+import cn.czfshine.notion.model.block.Block;
+import cn.czfshine.notion.model.block.BlockType;
+import cn.czfshine.notion.model.block.PageBlock;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import lombok.Data;

@@ -11,7 +11,7 @@ public class NotionRequest {
 
 
     public static void main(String args[]) throws IOException {
-        NotionClientV3 notionClientV3 = new NotionClientV3();
+        NotionClientV3Impl notionClientV3 = new NotionClientV3Impl();
         //System.out.println(notionClientV3.loadPage("ae9ff493-017b-4cf2-8ca5-9a3a9efa88e8"));
         // System.out.println(notionClientV3.getUserAnalyticsSettings());
         System.out.println(notionClientV3.loadUserContent());

@@ -1,6 +1,6 @@
 package cn.czfshine.notion;
 
-import cn.czfshine.notion.model.TextBlock;
+import cn.czfshine.notion.model.block.TextBlock;
 import lombok.Data;
 
 @Data

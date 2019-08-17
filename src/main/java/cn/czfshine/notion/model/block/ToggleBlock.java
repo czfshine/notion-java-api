@@ -1,4 +1,4 @@
-package cn.czfshine.notion.model;
+package cn.czfshine.notion.model.block;
 
 public class ToggleBlock extends PageBlock {
 }

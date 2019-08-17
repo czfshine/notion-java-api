@@ -1,7 +1,7 @@
 package cn.czfshine.notion.parser;
 
 import cn.czfshine.notion.EquationBlock;
-import cn.czfshine.notion.model.*;
+import cn.czfshine.notion.model.block.*;
 import cn.czfshine.notion.parser.Parser.JsonInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
