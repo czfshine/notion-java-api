@@ -1,4 +1,6 @@
 language: java
 script: "mvn package"
+notifications:
+  slack: czfshine:AeL58YwivltNdqODdsgPvWgL
 after_success:
   - bash <(curl -s https://codecov.io/bash) $CODECOV_TOKEN
