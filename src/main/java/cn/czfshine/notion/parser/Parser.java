@@ -162,7 +162,7 @@ public class Parser {
                 continue;
             }
 
-            block = BlockFactory.createBlockByType(blockInfo, typeByName);
+            block = BlockFactory.createBlockByType(blockInfo);
             allBlocks.put(uuid, block);
         }
         //page

@@ -5,6 +5,7 @@ import cn.czfshine.notion.model.*;
 import cn.czfshine.notion.parser.Parser.JsonInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,10 +55,11 @@ public class BlockFactory {
     }
 
     @NotNull
-    public static HeaderBlock createHeaderBlock(JsonInfo info, @NotNull BlockType blockType) {
+    public static HeaderBlock createHeaderBlock(JsonInfo info) {
         HeaderBlock headerBlock = new HeaderBlock();
         setBasicInfo(headerBlock, info);
         headerBlock.setText(getRichByInfoFromTitle(info));
+        BlockType blockType = BlockType.getTypeByName(info.value.type);
         switch (blockType) {
             case HEADER: {
                 headerBlock.setLevel((byte) 1);
@@ -130,6 +132,7 @@ public class BlockFactory {
         return collectionViewBlock;
     }
 
+    @NotNull
     public static CollectionViewPageBlock createCollectionViewPageBlock(JsonInfo info) {
         CollectionViewPageBlock collectionViewPageBlock = new CollectionViewPageBlock();
         setBasicInfo(collectionViewPageBlock, info);
@@ -137,7 +140,8 @@ public class BlockFactory {
         return collectionViewPageBlock;
     }
 
-    private static String getFirstStringFromPropertiesStringArray(JsonInfo info, String propertiesName, String className) {
+    @Nullable
+    private static String getFirstStringFromPropertiesStringArray(@NotNull JsonInfo info, String propertiesName, String className) {
         Object source = info.value.properties.get(propertiesName);
         if (source != null && source instanceof List) {
             Object o = ((List) source).get(0);
@@ -152,17 +156,19 @@ public class BlockFactory {
         return null;
     }
 
-    private static void setUrlFromPropertiesStringArray(AUrlBlock aUrlBlock, JsonInfo info, String propertiesName) {
+    private static void setUrlFromPropertiesStringArray(@NotNull AUrlBlock aUrlBlock, JsonInfo info, String propertiesName) {
         String url = getFirstStringFromPropertiesStringArray(info, propertiesName, aUrlBlock.getClass().getName());
         aUrlBlock.setUrl(url);
     }
 
+    @NotNull
     public static BookmarkBlock createBookmarkBlock(JsonInfo info) {
         BookmarkBlock bookmarkBlock = new BookmarkBlock();
         setUrlFromPropertiesStringArray(bookmarkBlock, info, "link");
         return bookmarkBlock;
     }
 
+    @NotNull
     public static ImageBlock createImageBlock(JsonInfo info) {
         ImageBlock imageBlock = new ImageBlock();
         setBasicInfo(imageBlock, info);
@@ -170,6 +176,7 @@ public class BlockFactory {
         return imageBlock;
     }
 
+    @NotNull
     public static CodeBlock createCodeBlock(JsonInfo info) {
         CodeBlock codeBlock = new CodeBlock();
         String language = getFirstStringFromPropertiesStringArray(info, "language", codeBlock.getClass().getName());
@@ -177,6 +184,7 @@ public class BlockFactory {
         return codeBlock;
     }
 
+    @NotNull
     public static EmbedBlock createEmbedBlock(JsonInfo info) {
         EmbedBlock embedBlock = new EmbedBlock();
 
@@ -196,22 +204,30 @@ public class BlockFactory {
         return embedBlock;
     }
 
+    public static UnknowBlock createUnknownBlock(JsonInfo info) {
+        return new UnknowBlock();
+    }
+
+    @NotNull
     public static TableOfContentsBlock createTableOfContentsBlock(JsonInfo info) {
         TableOfContentsBlock tableOfContentsBlock = new TableOfContentsBlock();
         return tableOfContentsBlock;
     }
 
+    @NotNull
     public static EquationBlock createEquationBlock(JsonInfo info) {
         EquationBlock equationBlock = new EquationBlock();
         equationBlock.setText(getRichByInfoFromTitle(info));
         return equationBlock;
     }
 
+    @NotNull
     public static BreadcrumbBlock createBreadcrumbBlock(JsonInfo info) {
         BreadcrumbBlock breadcrumbBlock = new BreadcrumbBlock();
         return breadcrumbBlock;
     }
 
+    @NotNull
     public static CalloutBlock createCalloutBlock(JsonInfo info) {
         CalloutBlock calloutBlock = new CalloutBlock();
 
@@ -227,92 +243,10 @@ public class BlockFactory {
         return calloutBlock;
     }
 
-    public static Block createBlockByType(JsonInfo info, @NotNull BlockType blockType) {
-        switch (blockType) {
-
-            //Text block
-            case TEXT: {
-                return createTextBlock(info);
-            }
-            case TODO: {
-                return createTodoBlock(info);
-            }
-            case HEADER:
-            case SUBHEADER:
-            case SUBSUBHEADER: {
-                return createHeaderBlock(info, blockType);
-            }
-            case BULLETEDLIST: {
-                return createBulletedListBlock(info);
-            }
-            case NUMBEREDLIST: {
-                return createNumberListBlock(info);
-            }
-            case TOGGLE: {
-                return createToggleBlock(info);
-            }
-            case EQUATION: {
-                return createEquationBlock(info);
-            }
-            case QUOTE: {
-                return createQuoteBlock(info);
-            }
-            //url block
-            case COLLECTIONVIEW: {
-                return createCollectionViewBlock(info);
-            }
-            case CODE: {
-                return createCodeBlock(info);
-            }
-            case CALLOUT: {
-                return createCalloutBlock(info);
-            }
-            case EMBED: {
-                return createEmbedBlock(info);
-            }
-            case BOOKMARK: {
-                return createBookmarkBlock(info);
-            }
-            case IMAGE: {
-                return createImageBlock(info);
-            }
-
-            case DIVIDER: {
-                return createDividerBlock(info);
-            }
-
-            case COLLECTIONVIEWPAGE: {
-                return createCollectionViewPageBlock(info);
-            }
-
-            case BREADCRUMB: {
-                return createBreadcrumbBlock(info);
-            }
-            case TABLEOFCONTENTS: {
-                return createTableOfContentsBlock(info);
-            }
-
-            case PAGE:
-            case FACTORY: //todo page block
-                break;
-
-            case AUDIO: //TODO UPLOAD
-                break;
-            case FILE: //TODO UPLOAD
-                break;
-            case VIDEO: //TODO UPLOAD
-                break;
-
-            case MAPS:
-            case DRIVE:
-            case GIST:
-            case TWEET:
-            case UNKNOWN:
-                break;
-            default: {
-                return null;
-            }
-        }
-        return null;
+    @NotNull
+    public static Block createBlockByType(@NotNull JsonInfo info) {
+        BlockType blockType = BlockType.getTypeByName(info.value.type);
+        return blockType.getBlockSupplier().apply(info);
     }
+
 }
