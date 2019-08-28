@@ -1,5 +1,7 @@
 package cn.czfshine.notion.parser;
 
+import cn.czfshine.notion.model.User;
+import cn.czfshine.notion.model.WorkSpace;
 import cn.czfshine.notion.model.block.Block;
 import cn.czfshine.notion.model.block.BlockType;
 import cn.czfshine.notion.model.block.PageBlock;
@@ -8,9 +10,7 @@ import com.google.gson.internal.LinkedTreeMap;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**解析Json到对象.
  * 注意：有些内部类和json的key是一一对应的，
@@ -52,10 +52,13 @@ public class Parser {
             HashMap<String,Object> properties;
             List<String> content;
             List<String> discussions;
+
             List<HashMap<String,Object>> permissions;
 
-
+            //workspace
             String name;
+            String domain;
+            List<String> pages;
 
             @Data
             class Format {
@@ -105,7 +108,7 @@ public class Parser {
     /**
      * 分析页面数据
      **/
-    public static void parserPageChunk(String json) {
+    public static WorkSpace parserPageChunk(String json) {
 
         log.debug("start parser page chunk...");
 
@@ -114,15 +117,26 @@ public class Parser {
 
         HashMap<String, JsonInfo> notion_user = pageChunk.recordMap.notion_user;
         convertUsers(notion_user);
-        HashMap<String, JsonInfo> workspaces = pageChunk.recordMap.space;
-        convertWorkspaces(workspaces);
+
         HashMap<String, JsonInfo> blocks = pageChunk.recordMap.block;
         convertBlocksData(blocks);
+
+        // 先解析页面再解析工作区
+        HashMap<String, JsonInfo> workspaces = pageChunk.recordMap.space;
+        WorkSpace workSpace = null;
+        try {
+            workSpace = convertWorkspaces(workspaces);
+        } catch (ParserException e) {
+            e.printStackTrace();
+        }
 
         //System.out.println(gson.toJson(pageChunk));
 
         log.debug("end parser page chunk...");
+        return workSpace;
     }
+
+    private static HashMap<String, User> allUsers = new HashMap<>();
 
     private static void convertUsers(HashMap<String, JsonInfo> notion_user) {
         Set<String> set = notion_user.keySet();
@@ -135,71 +149,103 @@ public class Parser {
         }
     }
 
-    private static void convertWorkspaces(HashMap<String, JsonInfo> workspaces) {
+    static class ParserException extends Exception {
+
+    }
+
+    private static WorkSpace convertWorkspaces(HashMap<String, JsonInfo> workspaces) throws ParserException {
+
         Set<String> strings = workspaces.keySet();
-        for (String uuid : strings
-        ) {
-            log.debug("workspace name:{}", workspaces.get(uuid).value);
+        if (strings.size() == 0) {
+            log.error("must had a space info ");
+            //无法解决的
+            throw new ParserException();
         }
+        if (strings.size() > 1) {
+            //这个方法是加载页面的时调用的，所以一个页面只属于一个space，理论上不会载入多个space
+            log.warn("get too many space,use first item");
+        }
+
+        JsonInfo jsonInfo = workspaces.get(strings.iterator().next());
+        JsonInfo.Value value = jsonInfo.value;
+        WorkSpace workSpace = new WorkSpace();
+
+        //basic info
+        workSpace.setDomain(value.domain);
+        workSpace.setName(value.name);
+
+        //user info
+        value.permissions.forEach((e) -> {
+            Object uid = e.get("user_id");
+            User user = allUsers.get(uid);
+            if (user != null) {
+                workSpace.getUsers().add(user);
+            } else {
+                log.warn("space:{} has user:{} ,but not parser it", value.id, uid);
+            }
+        });
+
+        List<String> pages = value.pages;
+        if (pages != null) {
+            //todo  ordered
+            workSpace.getPageIds().addAll(pages);
+        }
+        return workSpace;
     }
 
     private static void convertBlocksData(HashMap<String, JsonInfo> blocks) {
-        HashMap<String, Block> allBlocks = new HashMap<>();
-        for (String uuid : blocks.keySet()
-        ) {
+
+        //需要引用另外的block的block，得在所有block解析完后进行二次处理
+        List<Block> hasContentBlocks = new LinkedList<>();
+
+        BlockPool thePool = BlockPool.getThePool();
+        blocks.keySet().forEach((uuid) -> {
             JsonInfo blockInfo = blocks.get(uuid);
-            BlockType typeByName = BlockType.getTypeByName(blockInfo.value.type);
+            BlockType type = BlockType.getTypeByName(blockInfo.value.type);
             Block block = null;
 
-            log.debug("get block type:{}", typeByName);
-            log.debug("data :{}", blockInfo.value);
+//            log.debug("get block type:{}", type);
+//            log.debug("data :{}", blockInfo.value);
 
-            if (typeByName.equals(BlockType.UNKNOWN)) {
+            if (type.equals(BlockType.UNKNOWN)) {
                 log.warn("unknow type :{}", blockInfo.value.type);
             }
 
-            if (typeByName.equals(BlockType.PAGE)) {
-                continue;
-            }
-
             block = BlockFactory.createBlockByType(blockInfo);
-            allBlocks.put(uuid, block);
-        }
-        //page
-        for (String uuid : blocks.keySet()
-        ) {
-            JsonInfo blockInfo = blocks.get(uuid);
-            BlockType typeByName = BlockType.getTypeByName(blockInfo.value.type);
-            if (typeByName.equals(BlockType.PAGE)) {
-                PageBlock pageBlock = BlockFactory.createPageBlock(blockInfo);
-                List<String> content = blockInfo.value.content;
 
-                if (content == null) {
-                    continue;
+            thePool.put(block);
+
+            switch (type) {
+                case PAGE:
+                case COLUMN:
+                case FACTORY:
+                case COLUMNLIST: {
+                    hasContentBlocks.add(block);
                 }
-                pageBlock.setContentIds(content);
-                for (int i = 0; i < content.size(); i++) {
-                    //todo
-                    Block orDefault = allBlocks.getOrDefault(content.get(i), null);
-                    if (orDefault == null) {
-                        log.warn("the page {} has sub block {} but not exits!", uuid, content.get(i));
-                    } else {
-                        pageBlock.addBlockContent(orDefault);
-                    }
+                default: {
+                    break;
                 }
-                log.debug("the page :{}", pageBlock);
             }
-        }
+        });
+
+        hasContentBlocks.forEach((block) -> {
+            if (block instanceof PageBlock) {
+                List<String> contentIds = ((PageBlock) block).getContentIds();
+                contentIds.forEach((id) -> {
+                    //todo foreach的顺序是否和获取的一样
+                    Optional<Block> subblock = thePool.get(id);
+                    if (subblock.isPresent()) {
+                        ((PageBlock) block).addBlockContent(subblock.get());
+                    } else {
+                        //todo 根据api的分析，理论上应该会全部获取的，不会出现这种情况，或者可能有分页
+                        log.error("the block {} has subblock {},but not got it", block.getId(), id);
+                    }
+                });
+            } else {
+                //todo column
+            }
+        });
     }
-
-
-    private static void parserTextBlock(String uuid, JsonInfo block) {
-        //System.out.println(uuid);
-        if (block.value.properties != null) {
-            //System.out.println(parserTitle((ArrayList) block.value.properties.get("text")));
-        }
-    }
-
 
     public static void parserUserContent(String json) {
         ResponeJson responeJson = gson.fromJson(json, ResponeJson.class);

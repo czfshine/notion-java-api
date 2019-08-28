@@ -31,4 +31,9 @@ public class RichText {
     public RichText() {
 
     }
+
+    @Override
+    public String toString() {
+        return title;
+    }
 }

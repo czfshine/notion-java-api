@@ -1,5 +1,6 @@
 package cn.czfshine.notion.parser;
 
+import cn.czfshine.notion.model.WorkSpace;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +15,7 @@ import java.io.*;
  * @since <pre>Jun 30, 2019</pre>
  */
 public class PaserTest {
+
 
     @Before
     public void before() throws Exception {
@@ -39,7 +41,9 @@ public class PaserTest {
      */
     @Test
     public void testPaserPageChunk() throws Exception {
-        Parser.parserPageChunk(getResourcesFileContent("page.json"));
+        WorkSpace workSpace = Parser.parserPageChunk(getResourcesFileContent("page.json"));
+        System.out.println(workSpace.toString());
+        Parser.parserPageChunk(getResourcesFileContent("layout.json"));
     }
 
     /**
